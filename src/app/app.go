@@ -22,13 +22,13 @@ func Run() {
 
 	app := tview.NewApplication()
 
-	inputFieldSubmissionCh := make(chan inputfield.SubmissionEvent)
-	userSelectionEventCh := make(chan userlist.UserSelectionEvent)
+	messageSubmissionCh := make(chan inputfield.SubmissionEvent)
+	userSelectionCh := make(chan userlist.SelectionEvent)
 
 	// Initialize components.
-	usersListSection := userlist.NewUserList(appState, userSelectionEventCh)
+	usersListSection := userlist.NewUserList(appState, userSelectionCh)
 	chatViewSection := chatview.NewChatView()
-	inputFieldSection := inputfield.NewInputField(appState, inputFieldSubmissionCh)
+	inputFieldSection := inputfield.NewInputField(appState, messageSubmissionCh)
 	mainSection := getMainSectionComponent(chatViewSection.TextView, inputFieldSection.InputField)
 
 	// Set up the overall layout.
@@ -37,13 +37,13 @@ func Run() {
 		AddItem(mainSection, 0, 1, false)
 
 	// Handle new user selection event.
-	go func(ch <-chan userlist.UserSelectionEvent) {
+	go func(ch <-chan userlist.SelectionEvent) {
 		for data := range ch {
 			chatViewSection.UpdateView(appState)
 			inputFieldSection.SetUserLabel(appState, &data.SelectedUser)
 			app.SetFocus(inputFieldSection)
 		}
-	}(userSelectionEventCh)
+	}(userSelectionCh)
 
 	// Handle input field submission event.
 	go func(ch <-chan inputfield.SubmissionEvent) {
@@ -56,7 +56,7 @@ func Run() {
 
 			app.SetFocus(usersListSection)
 		}
-	}(inputFieldSubmissionCh)
+	}(messageSubmissionCh)
 
 	// Set up key bindings for navigation
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {

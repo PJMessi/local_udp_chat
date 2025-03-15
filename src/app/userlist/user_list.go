@@ -6,7 +6,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-type UserSelectionEvent struct {
+type SelectionEvent struct {
 	SelectedUser state.User
 }
 
@@ -14,7 +14,7 @@ type UserList struct {
 	*tview.List
 }
 
-func NewUserList(appState *state.AppState, ch chan UserSelectionEvent) UserList {
+func NewUserList(appState *state.AppState, ch chan SelectionEvent) UserList {
 	component := tview.NewList().
 		ShowSecondaryText(false).
 		SetHighlightFullLine(true).
@@ -27,11 +27,11 @@ func NewUserList(appState *state.AppState, ch chan UserSelectionEvent) UserList 
 	return userList
 }
 
-func (u *UserList) setupHandler(appState *state.AppState, ch chan<- UserSelectionEvent) {
+func (u *UserList) setupHandler(appState *state.AppState, ch chan<- SelectionEvent) {
 	u.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		user := appState.SelectUser(uint(index))
 		if user != nil {
-			ch <- UserSelectionEvent{
+			ch <- SelectionEvent{
 				SelectedUser: *user,
 			}
 		}
