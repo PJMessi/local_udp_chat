@@ -32,9 +32,6 @@ func Run() {
 	inputFieldSection := inputfield.NewInputField()
 	mainSection := getMainSectionComponent(chatViewSection.TextView, inputFieldSection.InputField)
 
-	// usersListSection.List
-	// selectedUser := 0
-
 	// Set up the overall layout.
 	flex := tview.NewFlex().
 		AddItem(usersListSection.List, 20, 0, true).
@@ -42,7 +39,7 @@ func Run() {
 
 	// Marks the user with the given index as selected, update the chat view with the user's message,
 	// and updates the label in the input section, and focus the input section.
-	updateChatView := func(index int) {
+	usersListSection.SetupHandler(func(index int) {
 		// Update selected user.
 		user := appState.SelectUser(uint(index))
 		// Update chat view.
@@ -51,12 +48,10 @@ func Run() {
 		inputFieldSection.SetUserLabel(appState, user)
 		// Set focus to input section.
 		app.SetFocus(inputFieldSection)
-	}
-
-	usersListSection.SetupHandler(updateChatView)
+	})
 
 	// Handle input field submit
-	inputFieldSection.SetDoneFunc(func(key tcell.Key) {
+	inputFieldSection.SetupHandler(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
 			text := inputFieldSection.GetText()
 			if strings.TrimSpace(text) != "" {
@@ -108,9 +103,6 @@ func Run() {
 
 		return event
 	})
-
-	// Initial view setup - select the first user
-	updateChatView(0)
 
 	// Run the application
 	if err := app.SetRoot(flex, true).EnableMouse(true).Run(); err != nil {

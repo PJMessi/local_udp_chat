@@ -3,6 +3,7 @@ package inputfield
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/pjmessi/udp_chat/src/state"
 	"github.com/rivo/tview"
 )
@@ -24,4 +25,9 @@ func NewInputField() InputField {
 
 func (i *InputField) SetUserLabel(_ *state.AppState, selectedUser *state.User) {
 	i.SetLabel(fmt.Sprintf("[To: %s] > ", selectedUser.Name))
+}
+
+// Sets up the input field to execute the provided handler function when done.
+func (i *InputField) SetupHandler(handler func(tcell.Key)) {
+	i.SetDoneFunc(handler)
 }

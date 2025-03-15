@@ -22,8 +22,7 @@ func NewUserList(appState *state.AppState) UserList {
 	return userList
 }
 
-// This method accepts the function that is to be run when a list item is selected, and runs it on
-// selection.
+// Sets up the user list to execute the provided handler function when a user is selected.
 func (u *UserList) SetupHandler(handler func(index int)) {
 	u.SetSelectedFunc(func(index int, mainText string, secondaryText string, shortcut rune) {
 		handler(index)
