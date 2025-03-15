@@ -43,7 +43,7 @@ func NewAppState() *AppState {
 	appState := &AppState{
 		users:        users,
 		UsersMutex:   sync.RWMutex{},
-		SelectedUser: &users[0],
+		SelectedUser: nil,
 	}
 
 	appState.SelectUser(0)

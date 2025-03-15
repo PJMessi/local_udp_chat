@@ -1,10 +1,6 @@
 package app
 
 import (
-	"fmt"
-	"strings"
-	"time"
-
 	"github.com/gdamore/tcell/v2"
 	"github.com/pjmessi/udp_chat/src/app/chatview"
 	"github.com/pjmessi/udp_chat/src/app/inputfield"
@@ -26,10 +22,13 @@ func Run() {
 
 	app := tview.NewApplication()
 
+	inputFieldSubmissionCh := make(chan inputfield.SubmissionEvent)
+	userSelectionEventCh := make(chan userlist.UserSelectionEvent)
+
 	// Initialize components.
-	usersListSection := userlist.NewUserList(appState)
+	usersListSection := userlist.NewUserList(appState, userSelectionEventCh)
 	chatViewSection := chatview.NewChatView()
-	inputFieldSection := inputfield.NewInputField()
+	inputFieldSection := inputfield.NewInputField(appState, inputFieldSubmissionCh)
 	mainSection := getMainSectionComponent(chatViewSection.TextView, inputFieldSection.InputField)
 
 	// Set up the overall layout.
@@ -37,51 +36,27 @@ func Run() {
 		AddItem(usersListSection.List, 20, 0, true).
 		AddItem(mainSection, 0, 1, false)
 
-	// Marks the user with the given index as selected, update the chat view with the user's message,
-	// and updates the label in the input section, and focus the input section.
-	usersListSection.SetupHandler(func(index int) {
-		// Update selected user.
-		user := appState.SelectUser(uint(index))
-		// Update chat view.
-		chatViewSection.UpdateView(appState)
-		// Update input section.
-		inputFieldSection.SetUserLabel(appState, user)
-		// Set focus to input section.
-		app.SetFocus(inputFieldSection)
-	})
+	// Handle new user selection event.
+	go func(ch <-chan userlist.UserSelectionEvent) {
+		for data := range ch {
+			chatViewSection.UpdateView(appState)
+			inputFieldSection.SetUserLabel(appState, &data.SelectedUser)
+			app.SetFocus(inputFieldSection)
+		}
+	}(userSelectionEventCh)
 
-	// Handle input field submit
-	inputFieldSection.SetupHandler(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			text := inputFieldSection.GetText()
-			if strings.TrimSpace(text) != "" {
-				selectedUser := appState.GetSelectedUser()
-
-				// Add the message to the current user's chat
-				selectedUser.AppendMessage(appState, text, state.MessageSourceSelf)
-
-				// Simulate a reply after a brief delay
-				go func() {
-					time.Sleep(time.Second)
-					app.QueueUpdateDraw(func() {
-						selectedUser.AppendMessage(appState, fmt.Sprintf("You said: '%s'", text), state.MessageSourceUser)
-						// Update chat view.
-						chatViewSection.UpdateView(appState)
-					})
-				}()
-
-				// Clear input and update view
-				inputFieldSection.SetText("")
-				// Update chat view.
+	// Handle input field submission event.
+	go func(ch <-chan inputfield.SubmissionEvent) {
+		for data := range ch {
+			if data.Status == inputfield.Sumibtted {
 				chatViewSection.UpdateView(appState)
-				// Set focus to input section.
 				app.SetFocus(inputFieldSection)
+				continue
 			}
-		} else if key == tcell.KeyEscape {
-			// When Escape is pressed, go back to user selection
+
 			app.SetFocus(usersListSection)
 		}
-	})
+	}(inputFieldSubmissionCh)
 
 	// Set up key bindings for navigation
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
