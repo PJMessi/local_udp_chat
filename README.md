@@ -23,12 +23,17 @@ go run main.go enter_your_username
 ## Run With Makefile
 1. Make sure you have docker installed.
 
-2. Run instance 1
+2. Build docker image
+```bash
+make build
+```
+
+3. Run instance 1
 ```bash
 make run1
 ```
 
-3. Run instance 2
+4. Run instance 2
 ```bash
 make run2
 ```
