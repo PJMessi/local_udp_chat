@@ -72,10 +72,13 @@ func Run(username string) {
 
 	// Handle new message event.
 	go func(ch <-chan detector.NewMessageEvent) {
-		for range ch {
+		for data := range ch {
 			app.QueueUpdateDraw(func() {
 				chatViewSection.UpdateView(appState)
-				app.SetFocus(inputFieldSection)
+				// Only focus the input field, if the message is from the currently selected user.
+				if appState.SelectedUser != nil && appState.SelectedUser.Name == data.User.Name {
+					app.SetFocus(inputFieldSection)
+				}
 			})
 		}
 	}(newMessageCh)
