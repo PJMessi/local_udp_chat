@@ -38,3 +38,5 @@ make run1
 make run2
 ```
 
+## Screenshots
+![App Screenshot](screenshot.png)
