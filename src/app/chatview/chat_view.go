@@ -1,6 +1,7 @@
 package chatview
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/pjmessi/udp_chat/src/state"
@@ -11,16 +12,20 @@ type ChatView struct {
 	*tview.TextView
 }
 
-func NewChatView() ChatView {
-	chatView := tview.NewTextView().
+func NewChatView(ctx context.Context, appState *state.AppState) ChatView {
+	tviewComp := tview.NewTextView().
 		SetDynamicColors(true).
 		SetScrollable(true).
 		SetWordWrap(true)
-	chatView.SetBorder(true).SetTitle("Chat")
+	tviewComp.SetBorder(true).SetTitle("Chat")
 
-	return ChatView{
-		TextView: chatView,
+	chatView := ChatView{
+		TextView: tviewComp,
 	}
+
+	chatView.UpdateView(appState)
+
+	return chatView
 }
 
 func (c *ChatView) UpdateView(appState *state.AppState) {
@@ -40,7 +45,10 @@ func (c *ChatView) UpdateView(appState *state.AppState) {
 			}
 		}
 
-		// Scroll to the end
-		c.ScrollToEnd()
+	} else {
+		fmt.Fprintf(c, "select a user")
 	}
+
+	// Scroll to the end
+	c.ScrollToEnd()
 }

@@ -131,7 +131,6 @@ func (a *AppState) updateUser(updatedUser *User) {
 
 	for index := range a.users {
 		if a.users[index].Name == updatedUser.Name {
-			a.users[index].Id = updatedUser.Id
 			a.users[index].Name = updatedUser.Name
 			a.users[index].Messages = updatedUser.Messages
 			a.users[index].DetectedAt = updatedUser.DetectedAt

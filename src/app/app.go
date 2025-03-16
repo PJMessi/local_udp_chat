@@ -51,8 +51,8 @@ func Run(username string) {
 	}()
 
 	// Initialize components.
-	usersListSection := userlist.NewUserList(appState, userSelectionCh)
-	chatViewSection := chatview.NewChatView()
+	usersListSection := userlist.NewUserList(ctx, appState, userSelectionCh)
+	chatViewSection := chatview.NewChatView(ctx, appState)
 	inputFieldSection := inputfield.NewInputField(ctx, appState, messageSubmissionCh)
 	mainSection := getMainSectionComponent(chatViewSection.TextView, inputFieldSection.InputField)
 
@@ -102,7 +102,7 @@ func Run(username string) {
 	go func(ch <-chan detector.SearchCompleteEvent) {
 		for range ch {
 			app.QueueUpdateDraw(func() {
-				usersListSection.RefreshList(appState)
+				usersListSection.RefreshList(ctx, appState)
 			})
 		}
 	}(searchCompleteCh)

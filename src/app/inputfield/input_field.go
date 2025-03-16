@@ -28,7 +28,11 @@ type InputField struct {
 }
 
 func NewInputField(ctx context.Context, appState *state.AppState, ch chan SubmissionEvent) InputField {
-	tviewInputField := tview.NewInputField().SetLabel("> ").SetFieldWidth(0)
+	tviewInputField := tview.
+		NewInputField().
+		SetFieldBackgroundColor(tcell.ColorNone).
+		SetLabel("> ").
+		SetFieldWidth(0)
 	tviewInputField.SetBorder(true).SetTitle("Message")
 	inputField := InputField{InputField: tviewInputField}
 	inputField.setupHandler(ctx, appState, ch)
