@@ -34,19 +34,24 @@ func (c *ChatView) UpdateView(appState *state.AppState) {
 
 	selectedUser := appState.GetSelectedUser()
 	if selectedUser != nil {
-		for _, msg := range selectedUser.Messages {
-			timeStr := msg.Timestamp.Format("15:04")
+		messages := selectedUser.Messages
+		if len(messages) > 0 {
+			for _, msg := range messages {
+				timeStr := msg.Timestamp.Format("15:04")
 
-			if msg.Source == state.MessageSourceSelf {
-				fmt.Fprintf(c, "[green]%s [%s]:[white] %s\n", "You", timeStr, msg.Content)
+				if msg.Source == state.MessageSourceSelf {
+					fmt.Fprintf(c, "[green]%s [%s]:[white] %s\n", "You", timeStr, msg.Content)
 
-			} else {
-				fmt.Fprintf(c, "[blue]%s [%s]:[white] %s\n", selectedUser.Name, timeStr, msg.Content)
+				} else {
+					fmt.Fprintf(c, "[blue]%s [%s]:[white] %s\n", selectedUser.Name, timeStr, msg.Content)
+				}
 			}
+		} else {
+			fmt.Fprintf(c, "No messages yet. Type a message and hit 'Enter' to send. Hit 'Escape' to go back to selection.")
 		}
 
 	} else {
-		fmt.Fprintf(c, "select a user")
+		fmt.Fprintf(c, "Select a user")
 	}
 
 	// Scroll to the end

@@ -6,6 +6,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/pjmessi/udp_chat/src/app/chatview"
 	"github.com/pjmessi/udp_chat/src/app/inputfield"
+	"github.com/pjmessi/udp_chat/src/app/instruction"
 	"github.com/pjmessi/udp_chat/src/app/userlist"
 	"github.com/pjmessi/udp_chat/src/logger"
 	"github.com/pjmessi/udp_chat/src/network/broadcaster"
@@ -15,11 +16,12 @@ import (
 	"github.com/rivo/tview"
 )
 
-func getMainSectionComponent(chatView *tview.TextView, inputField *tview.InputField) *tview.Flex {
+func getMainSectionComponent(instructionView *tview.TextView, chatView *tview.TextView, inputField *tview.InputField) *tview.Flex {
 	return tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(chatView, 0, 1, false).
-		AddItem(inputField, 3, 0, true)
+		AddItem(inputField, 3, 0, true).
+		AddItem(instructionView, 1, 0, false)
 }
 
 func Run(username string) {
@@ -54,7 +56,12 @@ func Run(username string) {
 	usersListSection := userlist.NewUserList(ctx, appState, userSelectionCh)
 	chatViewSection := chatview.NewChatView(ctx, appState)
 	inputFieldSection := inputfield.NewInputField(ctx, appState, messageSubmissionCh)
-	mainSection := getMainSectionComponent(chatViewSection.TextView, inputFieldSection.InputField)
+	instructionSection := instruction.NewInstructionView(ctx, appState)
+	mainSection := getMainSectionComponent(
+		instructionSection.TextView,
+		chatViewSection.TextView,
+		inputFieldSection.InputField,
+	)
 
 	// Set up the overall layout.
 	flex := tview.NewFlex().
