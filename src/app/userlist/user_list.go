@@ -38,12 +38,10 @@ func (u *UserList) setupHandler(appState *state.AppState, ch chan<- SelectionEve
 	})
 }
 
-// This method refreshes the list with potentially updated state data.
 func (u *UserList) RefreshList(state *state.AppState) {
 	u.Clear()
 
 	selectedUser := state.SelectedUser
-
 	for i, user := range state.GetUsers() {
 		u.AddItem(user.Name, "", rune('1'+i%9), nil)
 		if selectedUser != nil && user.Name == selectedUser.Name {

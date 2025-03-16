@@ -2,23 +2,27 @@ package state
 
 import (
 	"fmt"
+	"net"
 	"time"
 )
 
 type User struct {
 	Id             string
+	Address        *net.UDPAddr
 	Name           string
 	Messages       []Message
 	DetectedAt     time.Time
 	LastActivityAt *time.Time
 }
 
-func NewUser(name string) User {
+func NewUser(name string, address *net.UDPAddr) User {
 	return User{
 		Id:             generateId(name),
 		Name:           name,
 		DetectedAt:     time.Now(),
 		LastActivityAt: nil,
+		Address:        address,
+		Messages:       []Message{},
 	}
 }
 

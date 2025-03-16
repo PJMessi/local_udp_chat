@@ -1,0 +1,12 @@
+services:
+  myapp1:
+    build: .
+    command: ./myapp prajwal
+    stdin_open: true  # Equivalent to -i
+    tty: true         # Equivalent to -t
+
+  myapp2:
+    build: .
+    command: ./myapp anisha
+    stdin_open: true  # Equivalent to -i
+    tty: true         # Equivalent to -t

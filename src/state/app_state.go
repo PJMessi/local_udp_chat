@@ -1,54 +1,36 @@
 package state
 
 import (
-	"fmt"
+	"net"
 	"slices"
 	"sort"
 	"sync"
-	"time"
 )
 
 const useSort bool = false
 
 type AppState struct {
+	SelfUsername string
 	users        []User
 	UsersMutex   sync.RWMutex
 	SelectedUser *User
 }
 
 // Creates new AppState with dummy users and messages.
-// TODO: Remove dummy variables.
 func NewAppState() *AppState {
 	// Generate dummy users and messages.
-	users := []User{
-		{Name: "Alice", Messages: []Message{}},
-		{Name: "Bob", Messages: []Message{}},
-		{Name: "Charlie", Messages: []Message{}},
-		{Name: "Dave", Messages: []Message{}},
-	}
-
-	for i := range users {
-		users[i].Messages = append(users[i].Messages, Message{
-			Source:    MessageSourceSelf,
-			Content:   fmt.Sprintf("Hi %s, how are you?", users[i].Name),
-			Timestamp: time.Now().Add(-time.Hour),
-		})
-		users[i].Messages = append(users[i].Messages, Message{
-			Source:    MessageSourceUser,
-			Content:   "I'm doing well, thanks for asking!",
-			Timestamp: time.Now().Add(-time.Minute * 55),
-		})
-	}
 
 	appState := &AppState{
-		users:        users,
+		users:        []User{},
 		UsersMutex:   sync.RWMutex{},
 		SelectedUser: nil,
 	}
 
-	appState.SelectUser(0)
-
 	return appState
+}
+
+func (a *AppState) SetUsername(username string) {
+	a.SelfUsername = username
 }
 
 // Returns a copy of the list of users from the app state.
@@ -93,11 +75,11 @@ func (a *AppState) SelectUser(i uint) *User {
 }
 
 // Adds a user in the app state.
-func (a *AppState) AddUser(name string) {
+func (a *AppState) AddUser(name string, address *net.UDPAddr) {
 	a.UsersMutex.Lock()
 	defer a.UsersMutex.Unlock()
 
-	newUser := NewUser(name)
+	newUser := NewUser(name, address)
 	a.users = append(a.users, newUser)
 }
 
@@ -117,7 +99,7 @@ func (a *AppState) RemoveUser(name string) {
 // Returns a copy of the user with the given name from the app state.
 func (a *AppState) GetUser(name string) *User {
 	a.UsersMutex.RLock()
-	defer a.UsersMutex.Unlock()
+	defer a.UsersMutex.RUnlock()
 
 	var userCopy User
 	for _, user := range a.users {
